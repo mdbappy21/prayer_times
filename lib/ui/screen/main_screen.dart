@@ -18,6 +18,14 @@ class _MainScreenState extends State<MainScreen> {
   String hijriDate='${HijriDate.date} ${HijriDate.monthName} ${HijriDate.year} Hijri';
   String gregorianDate='${GregorianDate.dayName} ${GregorianDate.day} ${GregorianDate.monthName} ${GregorianDate.year}';
   String formatted=GregorianDate.formattedTime;
+  bool _isDrawerOpen=false;
+
+  void _toggleDrawer() {
+    setState(() {
+      _isDrawerOpen = !_isDrawerOpen;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +34,9 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
         centerTitle: true,
-        leading: Icon(
-          Icons.menu,
+        leading: IconButton(
+          icon:Icon(Icons.menu),
+          onPressed: _toggleDrawer,
           color: AppColors.themeColor,
         ),
         title: Text(
@@ -36,43 +45,92 @@ class _MainScreenState extends State<MainScreen> {
         ),
         actions: [Icon(Icons.more_vert, color: AppColors.themeColor)],
       ),
-      body: BackgroundWidget(
-        child: RefreshIndicator(
-          onRefresh: _updateDateTime,
-          child: Padding(
-            padding: EdgeInsets.all(8),
-            child: Column(
-              children: [
-                _buildHijriGregorianDate(context),
-                Padding(
-                  padding: const EdgeInsets.only(
-                      left: 32, right: 32, top: 16, bottom: 16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '${_currentPrayerNameCorrection()} ${PrayerTime.currentPrayerStart} ${PrayerTime.currentEnd}',
-                        style: Theme.of(context).textTheme.titleMedium,
+      body: Stack(
+        children: [
+          BackgroundWidget(
+            child: RefreshIndicator(
+              onRefresh: _updateDateTime,
+              child: Padding(
+                padding: EdgeInsets.only(left: 8,right: 8),
+                child: Column(
+                  children: [
+                    _buildHijriGregorianDate(context),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 32, right: 32,top: 8, bottom: 16),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Text("Current Prayer ",style: Theme.of(context).textTheme.titleMedium),
+                            Text('${_currentPrayerNameCorrection()} ${PrayerTime.currentPrayerStart} ${PrayerTime.currentEnd}',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Icon(Icons.handshake_outlined),
-                          Icon(Icons.lock_clock),
-                          Icon(Icons.book),
-                          Icon(Icons.map),
-                          Icon(Icons.person),
-                        ],
-                      ),
-                    ],
-                  ),
+                    ),
+                    _buildPrayerTime()
+                  ],
                 ),
-                _buildPrayerTime()
-              ],
+              ),
             ),
           ),
-        ),
+          Stack(
+            children: [
+              // GestureDetector to detect taps outside the drawer
+              if (_isDrawerOpen)
+                GestureDetector(
+                  onTap: _toggleDrawer, // Close the drawer when tapping outside
+                  child: Container(
+                    color: Colors.black.withOpacity(0.5), // Optional: Adds a semi-transparent overlay
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+
+              // Drawer
+              if (_isDrawerOpen)
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 250, // Drawer width
+                  child: Container(
+                    color: AppColors.backgroundColor,
+                    child: ListView(
+                      children: [
+                        ListTile(
+                          leading: Icon(Icons.home),
+                          title: Text('Al-Quran', style: Theme.of(context).textTheme.titleMedium),
+                          onTap: _toggleDrawer, // Close the drawer
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.settings),
+                          title: Text('Kebla Campus', style: Theme.of(context).textTheme.titleMedium),
+                          onTap: _toggleDrawer, // Close the drawer
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.settings),
+                          title: Text('Dua', style: Theme.of(context).textTheme.titleMedium),
+                          onTap: _toggleDrawer, // Close the drawer
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.settings),
+                          title: Text('Prayer Education', style: Theme.of(context).textTheme.titleMedium),
+                          onTap: _toggleDrawer, // Close the drawer
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.settings),
+                          title: Text('Important Date', style: Theme.of(context).textTheme.titleMedium),
+                          onTap: _toggleDrawer, // Close the drawer
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          )
+        ],
       ),
     );
   }
@@ -121,39 +179,18 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildHijriGregorianDate(BuildContext context) {
     return Card(
+      borderOnForeground: true,
       color: Colors.transparent,
-      child: Column(
-        children: [
-          ListTile(
-            title: IntrinsicHeight(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    children: [
-                      Text(hijriDate, style: Theme.of(context).textTheme.titleMedium),
-                      Text(gregorianDate,style: Theme.of(context).textTheme.titleMedium,),
-                    ],
-                  ),
-                  Container(
-                    width: 2, // Thickness of the line
-                    height: double.infinity, // Full height
-                    color: Colors.grey, // Line color
-                    // margin: EdgeInsets.symmetric(horizontal: 10),
-                  ),
-                  Column(
-                    children: [
-                      Text(formatted, style: Theme.of(context).textTheme.titleMedium),
-                      Text('Dhaka', style: Theme.of(context).textTheme.titleMedium),
-                      Text('Bangladesh', style: Theme.of(context).textTheme.titleMedium),
-                      SizedBox(height: 20)
-                    ],
-                  )
-                ],
-              ),
-            ),
-          )
-        ],
+      child: ListTile(
+        title: Center(
+          child: Column(
+            children: [
+              Text(hijriDate, style: Theme.of(context).textTheme.titleMedium),
+              Text(gregorianDate,style: Theme.of(context).textTheme.titleMedium,),
+              Text(formatted, style: Theme.of(context).textTheme.titleMedium),
+            ],
+          ),
+        ),
       ),
     );
   }

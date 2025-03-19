@@ -30,7 +30,14 @@ class PrayerTimeApp extends StatelessWidget {
         fontWeight: FontWeight.bold,
         fontSize: 16
       )
-    )
+    ),
+        iconTheme: IconThemeData(
+          color: AppColors.iconColor
+        ),
+    listTileTheme: ListTileThemeData(
+      iconColor: AppColors.iconColor, // Change this to your desired color
+    ),
+
   );
 
 
