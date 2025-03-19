@@ -1,0 +1,2 @@
+D:/Flutter/Project/prayer_time/android/app/.cxx/Debug/3h403eg2/x86/CMakeFiles/edit_cache.dir
+D:/Flutter/Project/prayer_time/android/app/.cxx/Debug/3h403eg2/x86/CMakeFiles/rebuild_cache.dir

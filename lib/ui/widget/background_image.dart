@@ -11,14 +11,11 @@ class BackgroundWidget extends StatelessWidget {
     Size size=MediaQuery.of(context).size;
     return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SvgPicture.asset(
-            AssetPaths.backgroundSvg,
-            height: size.height,
-            width: size.width,
-            fit: BoxFit.fitHeight,
-          ),
+        SvgPicture.asset(
+          AssetPaths.backgroundSvg,
+          height: size.height,
+          width: size.width,
+          fit: BoxFit.fitHeight,
         ),
         child
       ],
