@@ -49,28 +49,34 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           BackgroundWidget(
             child: RefreshIndicator(
-              onRefresh: _updateDateTime,
-              child: Padding(
-                padding: EdgeInsets.only(left: 8,right: 8),
-                child: Column(
-                  children: [
-                    _buildHijriGregorianDate(context),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 32, right: 32,top: 8, bottom: 16),
-                      child: Center(
-                        child: Column(
-                          children: [
-                            Text("Current Prayer ",style: Theme.of(context).textTheme.titleMedium),
-                            Text('${_currentPrayerNameCorrection()} ${PrayerTime.currentPrayerStart} ${PrayerTime.currentEnd}',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ],
+              onRefresh: () async {
+                await _updateDateTime();
+              },
+              child:SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.only(left: 8,right: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildHijriGregorianDate(context),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 32, right: 32,top: 8, bottom: 16),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Text("Current Prayer ",style: Theme.of(context).textTheme.titleMedium),
+                              Text('${_currentPrayerNameCorrection()} ${PrayerTime.currentPrayerStart} ${PrayerTime.currentEnd}',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    _buildPrayerTime()
-                  ],
+                      _buildPrayerTime()
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -132,40 +138,53 @@ class _MainScreenState extends State<MainScreen> {
           )
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await _updateDateTime();
+        },
+        child: Icon(Icons.refresh),
+      ),
     );
   }
 
   Future<void> _updateDateTime() async {
-    setState(() {
-      //GregorianDate update
-      DateTime currentDateTime=DateTime.now();
-      String dayName = DateFormat('EEEE').format(currentDateTime);
-      String monthName = DateFormat('MMMM').format(currentDateTime);
-      String day = DateFormat('d').format(currentDateTime);
-      String year = DateFormat('y').format(currentDateTime);
-      String formattedTime = DateFormat('hh:mm a').format(currentDateTime);
+    print('Working');
+    setState(
+      () {
+        //GregorianDate update
+        DateTime currentDateTime = DateTime.now();
+        String dayName = DateFormat('EEEE').format(currentDateTime);
+        String monthName = DateFormat('MMMM').format(currentDateTime);
+        String day = DateFormat('d').format(currentDateTime);
+        String year = DateFormat('y').format(currentDateTime);
+        String formattedTime = DateFormat('hh:mm a').format(currentDateTime);
 
-      //hijri date update
-       var currentHijri = HijriCalendar.now();
-       int hijriYear=currentHijri.hYear;
-       String hijriMonthName=currentHijri.longMonthName;
-      int currentHijriDate=currentHijri.hDay;
-      //
-      DateTime midNightOfADay = HijriDate.timeToDateTime(PrayerTime.midNight);//midnight
-      DateTime ifterTime = HijriDate.timeToDateTime(PrayerTime.magribStart);//magribStart
-      DateTime currentTime = HijriDate.timeToDateTime(formattedTime);//current
-      //
-      if (currentTime.isAfter(midNightOfADay) && currentTime.isBefore(ifterTime)){
-        currentHijriDate-=1;
-      }else{
-        currentHijriDate;
-      }
+        //hijri date update
+        var currentHijri = HijriCalendar.now();
+        int hijriYear = currentHijri.hYear;
+        String hijriMonthName = currentHijri.longMonthName;
+        int currentHijriDate = currentHijri.hDay;
+        //
+        DateTime midNightOfADay =
+            HijriDate.timeToDateTime(PrayerTime.midNight); //midnight
+        DateTime ifterTime =
+            HijriDate.timeToDateTime(PrayerTime.magribStart); //magribStart
+        DateTime currentTime =
+            HijriDate.timeToDateTime(formattedTime); //current
+        //
+        if (currentTime.isAfter(midNightOfADay) &&
+            currentTime.isBefore(ifterTime)) {
+          currentHijriDate -= 1;
+        } else {
+          currentHijriDate;
+        }
 
-      //update status
-      hijriDate = '$currentHijriDate $hijriMonthName $hijriYear Hijri';
-      gregorianDate = '$dayName $day $monthName $year';
-      formatted = formattedTime;
-    });
+        //update status
+        hijriDate = '$currentHijriDate $hijriMonthName $hijriYear Hijri';
+        gregorianDate = '$dayName $day $monthName $year';
+        formatted = formattedTime;
+      },
+    );
   }
 
   String _currentPrayerNameCorrection(){
@@ -196,225 +215,223 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildPrayerTime() {
-    return Expanded(
-      child: SingleChildScrollView(
-        child: Card(
-          color: Colors.transparent,
-          child: Column(
-            children: [
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Sahri End",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.ishaEnd,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Fajr Start",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.fajrStart,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Fajr End",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.fajrEnd,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Sunrise Start",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.sunriseStart,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Ishraq Start",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.ishraqStart,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Dhuhr Start",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.dhuhrStart,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Dhuhr End",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.dhuhrEnd,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Asr Start",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.asrStart,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Asr End",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.asrEnd,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Sunset",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.sunset,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Magrib / Ifter",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.magribStart,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Magrib End",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.magribEnd,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Isha Start",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.ishaStart,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text("Isha End",
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ),
-                  Expanded(
-                      flex: 2,
-                      child: Text(PrayerTime.ishaEnd,
-                          style: Theme.of(context).textTheme.titleMedium)),
-                  Expanded(flex: 1, child: Icon(Icons.alarm))
-                ],
-              ),
-              SizedBox(height: 8),
-            ],
-          ),
+    return SingleChildScrollView(
+      child: Card(
+        color: Colors.transparent,
+        child: Column(
+          children: [
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Sahri End",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.ishaEnd,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Fajr Start",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.fajrStart,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Fajr End",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.fajrEnd,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Sunrise Start",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.sunriseStart,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Ishraq Start",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.ishraqStart,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Dhuhr Start",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.dhuhrStart,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Dhuhr End",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.dhuhrEnd,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Asr Start",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.asrStart,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Asr End",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.asrEnd,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Sunset",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.sunset,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Magrib / Ifter",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.magribStart,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Magrib End",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.magribEnd,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Isha Start",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.ishaStart,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Isha End",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.ishaEnd,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+          ],
         ),
       ),
     );
