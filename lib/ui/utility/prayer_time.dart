@@ -27,9 +27,8 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime fajrStartDateTime = DateTime.parse(fajrStartTime);
-  static String fajrStart = formatTime(fajrStartDateTime);
+  static String fajrStart = formatTime(fajrStartDateTime.add(Duration(minutes: 1)));
 
   //Fajr End Time
   static String get fajrEndTime {
@@ -39,10 +38,8 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime fajrEndDateTime = DateTime.parse(fajrEndTime);
-  static DateTime fajrEndDateTimeReduce = fajrEndDateTime.subtract(Duration(minutes: 1));
-  static String fajrEnd = formatTime(fajrEndDateTimeReduce);
+  static String fajrEnd = formatTime(fajrEndDateTime.subtract(Duration(minutes: 1)));
 
   //Sunrise start
   static String get sunrise {
@@ -52,13 +49,16 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime sunriseDateTime = DateTime.parse(sunrise);
   static String sunriseStart = formatTime(sunriseDateTime);
 
   //ishraq Start
   static DateTime ishraqDateTime = sunriseDateTime.add(Duration(minutes: 15));
   static String ishraqStart = formatTime(ishraqDateTime);
+
+  //ishraq End
+  static DateTime ishraqEndDateTime= dhuhrStartDateTime.subtract(Duration(minutes: 15));
+  static String ishraqEnd=formatTime(ishraqEndDateTime);
 
   //dhuhr Start
   static String get dhuhrStartTime {
@@ -68,9 +68,8 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime dhuhrStartDateTime = DateTime.parse(dhuhrStartTime);
-  static String dhuhrStart = formatTime(dhuhrStartDateTime);
+  static String dhuhrStart = formatTime(dhuhrStartDateTime.add(Duration(minutes: 1)));
 
   //dhuhr end
   static String get dhuhrEndTime {
@@ -80,9 +79,8 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime dhuhrEndDateTime = DateTime.parse(dhuhrEndTime);
-  static String dhuhrEnd = formatTime(dhuhrEndDateTime);
+  static String dhuhrEnd = formatTime(dhuhrEndDateTime.subtract(Duration(minutes: 1)));
 
   //Asr Start
   static String get asrStartTime {
@@ -92,9 +90,8 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime asrStartDateTime = DateTime.parse(asrStartTime);
-  static String asrStart = formatTime(asrStartDateTime);
+  static String asrStart = formatTime(asrStartDateTime.add(Duration(minutes: 1)));
 
   //Asr End
   static String get asrEndTime {
@@ -104,9 +101,8 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime asrEndDateTime = DateTime.parse(asrEndTime);
-  static String asrEnd = formatTime(asrEndDateTime);
+  static String asrEnd = formatTime(asrEndDateTime.subtract(Duration(minutes: 1)));
 
   //Sunset
   static String get sunsetStartTime {
@@ -116,7 +112,6 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime sunsetDateTime = DateTime.parse(sunsetStartTime);
   static String sunset = formatTime(sunsetDateTime);
 
@@ -128,9 +123,8 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime magribStartDateTime = DateTime.parse(magribStartTime);
-  static String magribStart = formatTime(magribStartDateTime);
+  static String magribStart = formatTime(magribStartDateTime.add(Duration(minutes: 1)));
 
   //Magrib End
   static String get magribEndTime {
@@ -140,9 +134,8 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime magribEndDateTime = DateTime.parse(magribEndTime);
-  static String magribEnd = formatTime(magribEndDateTime);
+  static String magribEnd = formatTime(magribEndDateTime.subtract(Duration(minutes: 1)));
 
   //Isha Start
   static String get ishaStartTime {
@@ -152,9 +145,8 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime ishaStartDateTime = DateTime.parse(ishaStartTime);
-  static String ishaStart = formatTime(ishaStartDateTime);
+  static String ishaStart = formatTime(ishaStartDateTime.add(Duration(minutes: 1)));
 
   //Isha End
   static String get ishaEndTime {
@@ -164,39 +156,45 @@ class PrayerTime {
       return 'Failed to get';
     }
   }
-
   static DateTime ishaEndDateTime = DateTime.parse(ishaEndTime);
-  static String ishaEnd = formatTime(ishaEndDateTime);
+  static String ishaEnd = formatTime(ishaEndDateTime.subtract(Duration(minutes: 1)));
 
-  //set a variable on 12:00 AM
-  // static String midNight = '${DateTime.now().copyWith(hour: 0, minute: 0)} AM';
+  //Sehri End
+  static String sehriEnd=formatTime(ishaEndDateTime);
+
+  //Mid Night to correct Hijri Date.
   static String midNight = '12:00 AM';
 
-
   //current Prayer
-  static String currentPrayerName=prayerTimes!.currentPrayer();
-  static DateTime current = prayerTimes!.timeForPrayer(currentPrayerName) ??(currentPrayerName=='ishabefore'?PrayerTime.ishaStartDateTime:DateTime.now() );
+  static String currentPrayerName=prayerNameCorrection(prayerTimes!.currentPrayer()) ;
+  static DateTime current = getCurrentPrayerStartTime(currentPrayerName);
   static String currentPrayerStart = formatTime(current);
-  static String currentEnd=currentEndTime(currentPrayerName);
+  static String currentEnd=getCurrentPrayerEndTime(currentPrayerName);
 
+}
 
-  // static String next = prayerTimes!.nextPrayer();
-  // static DateTime? currentDateTime = prayerTimes!.timeForPrayer(current);
-  // static DateTime? nextDateTime = prayerTimes!.timeForPrayer(next);
-  // static String currentStart = formatTimeNoLocal(currentDateTime!);
-  // static String currentEnd = formatTimeNoLocal(nextDateTime!);
+String prayerNameCorrection(String correctName){
+  DateTime currentTime=DateTime.now();
+  DateTime sunsetForbidden=PrayerTime.magribStartDateTime.subtract(Duration(minutes: 5));
+  if(currentTime.isAfter(PrayerTime.ishraqDateTime) && currentTime.isBefore(PrayerTime.dhuhrStartDateTime.subtract(Duration(minutes: 16)))){
+   return correctName="Ishraq/Chast";
+  }else if(currentTime.isAfter(PrayerTime.fajrEndDateTime) && currentTime.isBefore(PrayerTime.ishraqDateTime)){
+    return 'Forbidden Sunrise';
+  }else if(currentTime.isAfter(PrayerTime.ishraqEndDateTime) && currentTime.isBefore(PrayerTime.dhuhrStartDateTime)){
+    return 'Forbidden Mid Noon';
+  }else if(currentTime.isAfter(sunsetForbidden) && currentTime.isBefore(PrayerTime.magribStartDateTime)){
+    return 'Forbidden Sunset';
+  }
+  else{
+    return correctName;
+  }
 }
 
 String formatTime(DateTime dateTime) {
   return DateFormat('hh:mm a').format(dateTime.toLocal());
 }
 
-String formatTimeNoLocal(DateTime dateTime) {
-  return DateFormat('hh:mm a').format(dateTime);
-}
-
-
-String currentEndTime(String prayerName) {
+String getCurrentPrayerEndTime(String prayerName) {
   if(prayerName=='fajr'){
     return PrayerTime.fajrEnd;
   }else if(prayerName=='dhuhr'){
@@ -209,9 +207,39 @@ String currentEndTime(String prayerName) {
     return PrayerTime.ishaEnd;
   }else if(prayerName=='ishabefore'){
     return PrayerTime.ishaEnd;
+  } else if(prayerName=='Ishraq/Chast'){
+    return PrayerTime.ishraqEnd;
+  } else if(prayerName=='Forbidden Mid Noon'){
+    return PrayerTime.dhuhrStart;
+  }else if(prayerName=='Forbidden Sunset'){
+    return PrayerTime.sunset;
+  }else if(prayerName=='Forbidden Sunrise'){
+    return PrayerTime.ishraqStart;
   }
   return 'Failed';
 }
 
-
-
+DateTime getCurrentPrayerStartTime(String prayerName) {
+  if(prayerName=='fajr'){
+    return PrayerTime.fajrStartDateTime;
+  }else if(prayerName=='dhuhr'){
+    return PrayerTime.dhuhrStartDateTime;
+  }else if(prayerName=='asr'){
+    return PrayerTime.asrStartDateTime;
+  }else if(prayerName=='maghrib'){
+    return PrayerTime.magribStartDateTime;
+  }else if(prayerName=='isha'){
+    return PrayerTime.ishaStartDateTime;
+  } else if(prayerName=='ishabefore'){
+    return DateTime.now();
+  }else if(prayerName=='Ishraq/Chast'){
+    return PrayerTime.ishraqDateTime;
+  }else if(prayerName=='Forbidden Mid Noon'){
+    return PrayerTime.ishraqEndDateTime.add(Duration(minutes: 1));
+  }else if(prayerName=='Forbidden Sunset'){
+    return PrayerTime.sunsetDateTime.subtract(Duration(minutes: 5));
+  }else if(prayerName=='Forbidden Sunrise'){
+    return PrayerTime.sunriseDateTime;
+  }
+  return DateTime.now();
+}

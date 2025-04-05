@@ -62,7 +62,7 @@ class _MainScreenState extends State<MainScreen> {
                       _buildHijriGregorianDate(context),
                       Padding(
                         padding: const EdgeInsets.only(
-                            left: 32, right: 32,top: 8, bottom: 16),
+                            left: 32, right: 32, bottom: 8),
                         child: Center(
                           child: Column(
                             children: [
@@ -139,10 +139,14 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.green,
         onPressed: () async {
           await _updateDateTime();
         },
-        child: Icon(Icons.refresh),
+        shape: BeveledRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Icon(Icons.refresh,color: Colors.white,),
       ),
     );
   }
@@ -220,7 +224,7 @@ class _MainScreenState extends State<MainScreen> {
         color: Colors.transparent,
         child: Column(
           children: [
-            SizedBox(height: 8),
+            // SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
@@ -230,7 +234,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 Expanded(
                     flex: 2,
-                    child: Text(PrayerTime.ishaEnd,
+                    child: Text(PrayerTime.sehriEnd,
                         style: Theme.of(context).textTheme.titleMedium)),
                 Expanded(flex: 1, child: Icon(Icons.alarm))
               ],
@@ -270,7 +274,7 @@ class _MainScreenState extends State<MainScreen> {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Text("Sunrise Start",
+                  child: Text("Sunrise",
                       style: Theme.of(context).textTheme.titleMedium),
                 ),
                 Expanded(
@@ -285,12 +289,27 @@ class _MainScreenState extends State<MainScreen> {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Text("Ishraq Start",
+                  child: Text("Ishraq/Chasht",
                       style: Theme.of(context).textTheme.titleMedium),
                 ),
                 Expanded(
                     flex: 2,
                     child: Text(PrayerTime.ishraqStart,
+                        style: Theme.of(context).textTheme.titleMedium)),
+                Expanded(flex: 1, child: Icon(Icons.alarm))
+              ],
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text("Ishraq/Chasht End",
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Text(PrayerTime.ishraqEnd,
                         style: Theme.of(context).textTheme.titleMedium)),
                 Expanded(flex: 1, child: Icon(Icons.alarm))
               ],
@@ -430,7 +449,6 @@ class _MainScreenState extends State<MainScreen> {
                 Expanded(flex: 1, child: Icon(Icons.alarm))
               ],
             ),
-            SizedBox(height: 8),
           ],
         ),
       ),
