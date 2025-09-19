@@ -1,7 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:prayer_time/ui/screen/main_screen.dart';
-import 'package:prayer_time/ui/utility/assets_paths.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:prayer_time/ui/screen/home_screen.dart';
 import 'package:prayer_time/ui/widget/background_image.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -12,9 +12,11 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  String appVersion='';
   @override
   void initState() {
     super.initState();
+    _packageInfo();
     _moveToNextScreen();
   }
 
@@ -22,21 +24,37 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(Duration(seconds: 2));
     if(mounted){
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) =>MainScreen()));
+          context, MaterialPageRoute(builder: (context) =>HomeScreen()));
     }
   }
 
+  Future<void>_packageInfo() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+     appVersion = packageInfo.version;
+     setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BackgroundWidget(
         child: Center(
-          child: SvgPicture.asset(
-            AssetPaths.appLogoSvg,
-            width: 200,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+             CupertinoActivityIndicator(color: Colors.white,radius: 18,),
+              const SizedBox(height: 8),
+              Text('Version : $appVersion',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white70
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
-        ),),
+        ),
+      ),
     );
   }
 }

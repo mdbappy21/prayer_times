@@ -1,6 +1,7 @@
+import 'package:get/get.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
-import 'package:prayer_time/ui/utility/prayer_time.dart';
+import 'package:prayer_time/state_holders/prayer_controller.dart';
 
 class HijriDate {
   static var hijriDate = HijriCalendar.now();
@@ -18,10 +19,11 @@ class HijriDate {
   static int date = dateCorrect();
 
   static int dateCorrect() {
+    PrayerController prayerController=Get.find<PrayerController>();
     DateTime midNightOfADay =
-        HijriDate.timeToDateTime(PrayerTime.midNight); //midnight
+        HijriDate.timeToDateTime(prayerController.midNight); //midnight
     DateTime ifterTime =
-        HijriDate.timeToDateTime(PrayerTime.magribStart); //magribStart
+        HijriDate.timeToDateTime(prayerController.maghribStart); //magribStart
     DateTime currentTime = HijriDate.timeToDateTime(formattedTime); //current
 
     if (currentTime.isAfter(midNightOfADay) &&

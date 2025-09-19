@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:prayer_time/controller_binders.dart';
 import 'package:prayer_time/ui/screen/splash_screen.dart';
 import 'package:prayer_time/ui/utility/app_colors.dart';
 
@@ -7,10 +9,11 @@ class PrayerTimeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),
       theme: _buildLightThemeData(),
+      initialBinding: ControllerBinder(),
     );
   }
 
