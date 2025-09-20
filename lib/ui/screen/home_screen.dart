@@ -65,15 +65,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: const EdgeInsets.only(left: 32, right: 32, top: 8, bottom: 16),
       child: Center(
-        child: Column(
-          children: [
-            Text("Current Prayer ",
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Text('${_currentPrayerNameCorrection()} ${prayerController.currentPrayerStart} ${prayerController.currentPrayerEnd}',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ],
+        child: GetBuilder<PrayerController>(
+          builder: (prayerController) {
+            return Column(
+              children: [
+                Text("Current Prayer ",
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text('${_currentPrayerNameCorrection()} ${prayerController.currentPrayerStart} ${prayerController.currentPrayerEnd}',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            );
+          }
         ),
       ),
     );

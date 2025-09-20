@@ -19,6 +19,7 @@ dependencies:
   prayers_times: ^0.0.6
   get: ^4.7.2
   package_info_plus: ^9.0.0
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

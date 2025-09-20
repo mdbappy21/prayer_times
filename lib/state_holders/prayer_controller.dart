@@ -3,53 +3,79 @@ import 'package:hijri/hijri_calendar.dart';
 import 'package:prayer_time/ui/utility/coordinates_cities.dart';
 import 'package:prayers_times/prayers_times.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PrayerController extends GetxController {
   final String location = 'Asia/Dhaka';
   var hijriDate = HijriCalendar.now();
   PrayerTimes? prayerTimes;
-  String selectedCity = 'Dhaka/Dhaka';
-  String selectedDivision='';
+  String selectedCity = '';
+  String selectedDivision = '';
+  final String cityKey = 'selected_city_key';
+  bool isLoading = false;
 
   @override
-  void onInit() {
+  Future<void> onInit() async {
     super.onInit();
-    initialize();
+    await initialize();
   }
 
-  void initialize({String? division, String? city}) {
+  Future<void> loadCity() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    selectedCity = sharedPreferences.getString(cityKey) ?? 'Dhaka/Dhaka';
+  }
+
+  Future<void> saveCity({required String selectedValue}) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setString(cityKey, selectedValue);
+  }
+
+  Future<void> initialize({String? division, String? city}) async {
+    isLoading = true;
+    update();
     if (division != null && city != null) {
       if (CoordinatesCities.divisions.containsKey(division) &&
           CoordinatesCities.divisions[division]!.containsKey(city)) {
         selectedCity = "$division/$city";
+        await saveCity(selectedValue: selectedCity);
       }
+    } else {
+      await loadCity();
     }
+
+    if (selectedCity.isEmpty) {
+      selectedCity = 'Dhaka/Dhaka'; // final safeguard
+    }
+
     final parts = selectedCity.split('/');
-    selectedDivision = parts[0];
-    final selectedCityName = parts.length > 1 ? parts[1] : parts[0];
+    selectedDivision = parts.first;
+    final selectedCityName = parts.length > 1 ? parts.last : parts.first;
 
-    Coordinates coordinates = CoordinatesCities.divisions[selectedDivision]?[selectedCityName]??Coordinates(23.71153, 90.41115);
-
+    Coordinates coordinates =
+        CoordinatesCities.divisions[selectedDivision]?[selectedCityName] ??
+            Coordinates(23.71153, 90.41115);
 
     PrayerCalculationParameters params = PrayerCalculationMethod.karachi();
     params.madhab = PrayerMadhab.hanafi;
+
     prayerTimes = PrayerTimes(
       coordinates: coordinates,
       calculationParameters: params,
       precision: true,
       locationName: location,
     );
-    update();
 
+    isLoading = false;
+    update(); // ✅ only once, when prayerTimes is ready
   }
 
   Future<void> refreshPrayerTimes() async {
-    initialize(
-      division: selectedDivision.split('/').first.isEmpty?'Dhaka':selectedDivision.split('/').first,
+    await initialize(
+      division: selectedDivision.isEmpty ? 'Dhaka' : selectedDivision,
       city: selectedCity.split('/').last,
     );
-    update(); // notify listeners
   }
+
 
   // helper
   String formatTime(DateTime? dt) {
@@ -92,7 +118,7 @@ class PrayerController extends GetxController {
 
   // current prayer
   String get currentPrayerName {
-    if (prayerTimes == null) return "Unknown";
+    if (prayerTimes == null) return "loading";
     final df = DateFormat("hh:mm a");
     final now = DateTime.now();
 

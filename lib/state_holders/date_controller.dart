@@ -17,19 +17,27 @@ class DateController extends GetxController {
     _updateGregorian();
   }
 
-  DateTime _timeToDateTime(String time) {
-    final format = DateFormat("h:mm a");
-    return format.parse(time);
+  DateTime? _timeToDateTime(String time) {
+    if (time.isEmpty || time == "Unknown" || time == "Failed") return null;
+    try {
+      final format = DateFormat("h:mm a");
+      return format.parse(time);
+    } catch (e) {
+      return null;
+    }
   }
+
 
   int get hijriDay {
     final prayerController = Get.find<PrayerController>();
 
     final midNight = _timeToDateTime(prayerController.midNight);
-    final maghribStart = _timeToDateTime(prayerController.maghribStart);
+    final maghribStart = _timeToDateTime(prayerController.isLoading?'06:00 PM':prayerController.maghribStart);
     final now = DateTime.now();
     final currentTime = _timeToDateTime(DateFormat('hh:mm a').format(now));
-
+    if (midNight == null || maghribStart == null || currentTime == null) {
+      return hijriDate.hDay;
+    }
     if (currentTime.isAfter(midNight) && currentTime.isBefore(maghribStart)) {
       return hijriDate.hDay - 1;
     } else {
