@@ -20,6 +20,5 @@ class BackgroundWidget extends StatelessWidget {
         child
       ],
     );
-    ;
   }
 }
