@@ -89,7 +89,20 @@ class _AllPrayerTimeState extends State<AllPrayerTime> {
                     ),
                     Expanded(
                         flex: 2,
-                        child: Text(prayerController.ishraq,
+                        child: Text(prayerController.ishraqStart,
+                            style: Theme.of(context).textTheme.titleMedium)),
+                    Expanded(flex: 1, child: Icon(Icons.alarm))
+                  ],
+                ), Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Text("Ishraq End",
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ),
+                    Expanded(
+                        flex: 2,
+                        child: Text(prayerController.ishraqEnd,
                             style: Theme.of(context).textTheme.titleMedium)),
                     Expanded(flex: 1, child: Icon(Icons.alarm))
                   ],

@@ -28,11 +28,8 @@ class PrayerController extends GetxController {
     selectedDivision = parts[0];
     final selectedCityName = parts.length > 1 ? parts[1] : parts[0];
 
-    Coordinates? coordinates =
-    CoordinatesCities.divisions[selectedDivision]?[selectedCityName];
-    if (coordinates == null) {
-      return;
-    }
+    Coordinates coordinates = CoordinatesCities.divisions[selectedDivision]?[selectedCityName]??Coordinates(23.71153, 90.41115);
+
 
     PrayerCalculationParameters params = PrayerCalculationMethod.karachi();
     params.madhab = PrayerMadhab.hanafi;
@@ -48,7 +45,7 @@ class PrayerController extends GetxController {
 
   Future<void> refreshPrayerTimes() async {
     initialize(
-      division: selectedDivision.split('/').first,
+      division: selectedDivision.split('/').first.isEmpty?'Dhaka':selectedDivision.split('/').first,
       city: selectedCity.split('/').last,
     );
     update(); // notify listeners
@@ -56,65 +53,80 @@ class PrayerController extends GetxController {
 
   // helper
   String formatTime(DateTime? dt) {
-    if (dt == null) return "Failed";
+    if (dt == null) return "Unknown";
     return DateFormat('hh:mm a').format(dt);
   }
 
   // fajr
-  String get fajrStart => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.fajrStartTime);
-  String get fajrEnd => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.fajrEndTime?.subtract(const Duration(minutes: 1)));
+  String get fajrStart => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.fajrStartTime);
+  String get fajrEnd => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.fajrEndTime?.subtract(const Duration(minutes: 1)));
 
   // sunrise
-  String get sunrise => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.sunrise);
+  String get sunrise => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.sunrise);
 
   // ishraq (15 mins after sunrise)
-  String get ishraq => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.sunrise?.add(const Duration(minutes: 15)));
+  String get ishraqStart => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.sunrise?.add(const Duration(minutes: 15)));
+  String get ishraqEnd => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.dhuhrStartTime?.subtract(const Duration(minutes: 5)));
 
   // dhuhr
-  String get dhuhrStart => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.dhuhrStartTime);
-  String get dhuhrEnd => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.dhuhrEndTime);
+  String get dhuhrStart => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.dhuhrStartTime);
+  String get dhuhrEnd => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.dhuhrEndTime);
 
   // asr
-  String get asrStart => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.asrStartTime);
-  String get asrEnd => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.asrEndTime);
+  String get asrStart => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.asrStartTime);
+  String get asrEnd => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.asrEndTime);
 
   // maghrib
-  String get maghribStart => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.maghribStartTime);
-  String get maghribEnd => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.maghribEndTime);
+  String get maghribStart => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.maghribStartTime);
+  String get maghribEnd => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.maghribEndTime);
 
   // sunset (same as maghrib start)
   String get sunset => maghribStart;
 
   // isha
-  String get ishaStart => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.ishaStartTime);
-  String get ishaEnd => prayerTimes == null ? "Failed" : formatTime(prayerTimes!.ishaEndTime);
+  String get ishaStart => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.ishaStartTime);
+  String get ishaEnd => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.ishaEndTime);
 
   // midnight (fixed 12:00 AM)
   String get midNight => "12:00 AM";
 
   // current prayer
-  String get currentPrayerName => prayerTimes?.currentPrayer() ?? "Unknown";
+  String get currentPrayerName {
+    if (prayerTimes == null) return "Unknown";
+    final df = DateFormat("hh:mm a");
+    final now = DateTime.now();
+
+    final start = df.parse(ishraqStart);
+    final end = df.parse(ishraqEnd);
+
+    // merge with today's date
+    final startToday = DateTime(now.year, now.month, now.day, start.hour, start.minute);
+    final endToday = DateTime(now.year, now.month, now.day, end.hour, end.minute);
+
+    if (now.isAfter(startToday) && now.isBefore(endToday)) {
+      return 'ishraq';
+    }else if(prayerTimes?.currentPrayer()=='ishabefore'){
+      return 'isha';
+    }
+    final name = prayerTimes!.currentPrayer();
+    return name;
+  }
+
   DateTime get currentPrayerStartTime {
     final name = currentPrayerName;
-    return prayerTimes?.timeForPrayer(name) ?? (name == 'ishaBefore' ? DateTime.now() : DateTime.now());
+    return prayerTimes?.timeForPrayer(name) ?? (name == 'ishaBefore' ? prayerTimes!.timeForPrayer('isha')! : (name=='ishraq')?prayerTimes!.timeForPrayer('sunrise')!.add(Duration(minutes: 15)):DateTime.now());
   }
   String get currentPrayerStart => formatTime(currentPrayerStartTime);
   String get currentPrayerEnd => currentEndTime(currentPrayerName);
 
-
-  String get currentPrayer {
-    if (prayerTimes == null) return "Failed";
-    final name = prayerTimes!.currentPrayer();
-    final start = prayerTimes!.timeForPrayer(name);
-    return "$name - ${formatTime(start)}";
-  }
-
   String currentEndTime(String prayerName) {
-    if (prayerTimes == null) return "Failed";
+    if (prayerTimes == null) return "Unknown";
 
     switch (prayerName.toLowerCase()) {
       case "fajr":
         return formatTime(prayerTimes!.fajrEndTime);
+      case "ishraq":
+        return ishraqEnd;
       case "dhuhr":
         return formatTime(prayerTimes!.dhuhrEndTime);
       case "asr":
