@@ -6,7 +6,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.6.2
+  sdk: ^3.9.2
 
 dependencies:
   flutter:
@@ -20,6 +20,9 @@ dependencies:
   get: ^4.7.2
   package_info_plus: ^9.0.0
   shared_preferences: ^2.5.3
+  flutter_compass: ^0.8.1
+  geolocator: ^14.0.2
+  vector_math: ^2.2.0
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +37,7 @@ flutter:
   assets:
     - assets/images/
 
+
   # fonts:
   #   - family: Schyler
   #     fonts:
@@ -45,3 +49,6 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
