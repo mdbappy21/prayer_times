@@ -1,8 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:prayer_time/ui/screen/home_screen.dart';
 import 'package:prayer_time/ui/widget/background_image.dart';
+import 'package:prayer_time/ui/widget/centered_circular_progress_indicator.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-             CupertinoActivityIndicator(color: Colors.white,radius: 18,),
+             CenteredCircularProgressIndicator(),
               const SizedBox(height: 8),
               Text('Version : $appVersion',
                 style: TextStyle(

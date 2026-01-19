@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:prayer_time/ui/screen/important_rules.dart';
+import 'package:prayer_time/ui/screen/qibla_compass_screen.dart';
 import 'package:prayer_time/ui/utility/app_colors.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -13,6 +16,7 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
     return Stack(
       children: [
         if (isDrawerOpen)
@@ -30,40 +34,26 @@ class CustomDrawer extends StatelessWidget {
             left: 0,
             top: 0,
             bottom: 0,
-            width: 250, // Drawer width
+            width: size.width * .75,
             child: Container(
               color: AppColors.backgroundColor,
               child: ListView(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.home),
-                    title: Text('Al-Quran',
-                        style: Theme.of(context).textTheme.titleMedium),
-                    onTap: onToggleDrawer,
+                    leading: const Icon(Icons.info_outline),
+                    title: Text('Important Prayer Rules',style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white),),
+                    onTap: () {
+                      onToggleDrawer();
+                      Get.to(() => const ImportantRules());
+                    },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.settings),
-                    title: Text('Kebla Campus',
-                        style: Theme.of(context).textTheme.titleMedium),
-                    onTap: onToggleDrawer,
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.settings),
-                    title: Text('Dua',
-                        style: Theme.of(context).textTheme.titleMedium),
-                    onTap: onToggleDrawer,
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.settings),
-                    title: Text('Prayer Education',
-                        style: Theme.of(context).textTheme.titleMedium),
-                    onTap: onToggleDrawer,
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.settings),
-                    title: Text('Important Date',
-                        style: Theme.of(context).textTheme.titleMedium),
-                    onTap: onToggleDrawer,
+                    leading: const Icon(Icons.explore_outlined),
+                    title: Text('Qibla Compass',style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)),
+                    onTap: () {
+                      onToggleDrawer();
+                      Get.to(() => const QiblaCompassScreen());
+                    },
                   ),
                 ],
               ),
