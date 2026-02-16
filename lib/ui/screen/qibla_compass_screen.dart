@@ -20,7 +20,7 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen> {
   static const double _kaabaLat = 21.4225;
   static const double _kaabaLng = 39.8262;
 
-  double _qiblaDirection = 0.0; // degrees
+  double _qiblaDirection = 0.0;
   bool _loading = true;
   String? _error;
 
@@ -46,7 +46,6 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen> {
     }
   }
 
-  // ---------------- LOCATION ----------------
   Future<Position> _getLocation() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -63,11 +62,13 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen> {
     }
 
     return Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 0,
+      ),
     );
   }
 
-  // ---------------- QIBLA CALC ----------------
   double _calculateQibla(double lat, double lng) {
     final latRad = vm.radians(lat);
     final lngRad = vm.radians(lng);
@@ -81,14 +82,13 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen> {
     return (vm.degrees(atan2(y, x)) + 360) % 360;
   }
 
-  // ---------------- UI ----------------
   @override
   Widget build(BuildContext context) {
     Size size=MediaQuery.sizeOf(context);
     return Scaffold(
-      // backgroundColor: const Color(0xFFFBFBFB),
       appBar: AppBar(
         title: Text('Qibla Compass',style: Theme.of(context).textTheme.titleMedium),
+        centerTitle: true,
         leading: IconButton(
           onPressed: () {
             Get.back();
@@ -99,14 +99,12 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen> {
         backgroundColor: AppColors.backgroundColor,
       ),
       body: Center(
-        child: _loading
-            ? const CircularProgressIndicator()
-            : (_error != null
-            ? Text(
-          _error!,
-          style: const TextStyle(color: Colors.redAccent),
-        )
-            : _buildCompass(size)),
+        child: _loading ? const CircularProgressIndicator() :
+        (
+            _error != null ?
+            Text(_error!, style: const TextStyle(color: Colors.redAccent),) :
+            _buildCompass(size)
+        ),
       ),
     );
   }
@@ -131,8 +129,12 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen> {
         }
 
         final double headingRad = -heading * pi / 180;
+
         final double qiblaRad =
             (_qiblaDirection - heading) * pi / 180;
+
+        final double qiblaOffset =
+            (_qiblaDirection - heading + 360) % 360;
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -144,34 +146,54 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen> {
                   'assets/images/compass_bg.png',
                   width: size.width*.95,
                 ),
+
+                Positioned(
+                  top: 14,
+                  child: Container(
+                    width: 4,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+
                 Transform.rotate(
                   angle: headingRad,
                   child: Image.asset(
                     'assets/images/compass_dial.png',
-                    width: size.width*.8,
+                    width: size.width*.95,
                   ),
                 ),
                 Transform.rotate(
                   angle: qiblaRad,
                   child: Image.asset(
                     'assets/images/qibla_arrow.png',
-                    width: 140,
+                    width: size.width*.4,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+
+            const SizedBox(height: 16),
             Text(
-              'Qibla: ${_qiblaDirection.toStringAsFixed(1)}°',
+              '${qiblaOffset.toStringAsFixed(1)}°',
               style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
+            const Text(
+              'to Qibla',
+              style: TextStyle(color: Colors.black),
+            ),
+            const SizedBox(height: 10),
             const Text(
               'Keep the phone flat for accuracy',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: Colors.black),
             ),
           ],
         );

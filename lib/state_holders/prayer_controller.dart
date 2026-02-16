@@ -44,7 +44,7 @@ class PrayerController extends GetxController {
     }
 
     if (selectedCity.isEmpty) {
-      selectedCity = 'Dhaka/Dhaka'; // final safeguard
+      selectedCity = 'Dhaka/Dhaka';
     }
 
     final parts = selectedCity.split('/');
@@ -66,7 +66,7 @@ class PrayerController extends GetxController {
     );
 
     isLoading = false;
-    update(); // ✅ only once, when prayerTimes is ready
+    update();
   }
 
   Future<void> refreshPrayerTimes() async {
@@ -98,9 +98,14 @@ class PrayerController extends GetxController {
   String get dhuhrStart => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.dhuhrStartTime);
   String get dhuhrEnd => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.dhuhrEndTime);
 
+  //zenith time.
+  int zenithBuffer = 5; // later can come from settings
+  DateTime get zenithStart => prayerTimes!.dhuhrStartTime!.subtract(Duration(minutes: zenithBuffer));
+  DateTime get zenithEnd => prayerTimes!.dhuhrStartTime!;
+
   // asr
   String get asrStart => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.asrStartTime);
-  String get asrEnd => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.asrEndTime);
+  String get asrEnd => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.asrEndTime?.subtract(const Duration(minutes: 1)));
 
   // maghrib
   String get maghribStart => prayerTimes == null ? "Unknown" : formatTime(prayerTimes!.maghribStartTime);
@@ -134,6 +139,9 @@ class PrayerController extends GetxController {
     }else if(prayerTimes?.currentPrayer()=='ishabefore'){
       return 'isha';
     }
+    if (now.isAfter(zenithStart) && now.isBefore(zenithEnd)) {
+      return "forbidden";
+    }
     final name = prayerTimes!.currentPrayer();
     return name;
   }
@@ -165,6 +173,8 @@ class PrayerController extends GetxController {
         return formatTime(prayerTimes!.sunrise);
       case "ishabefore":
         return formatTime(prayerTimes!.ishaEndTime);
+      case "forbidden":
+        return formatTime(prayerTimes!.dhuhrStartTime);
       default:
         return "Unknown";
     }
