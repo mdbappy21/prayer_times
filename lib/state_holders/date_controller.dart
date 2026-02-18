@@ -39,8 +39,33 @@ class DateController extends GetxController {
       return hijriDate.hDay;
     }
     if (currentTime.isAfter(midNight) && currentTime.isBefore(maghribStart)) {
-      return hijriDate.hDay - 1;
-    } else {
+      if (hijriDate.hDay - 1 == 0) {
+
+        int prevMonth = hijriDate.hMonth - 1;
+        int prevYear = hijriDate.hYear;
+
+        if (prevMonth == 0) {
+          prevMonth = 12;
+          prevYear -= 1;
+        }
+
+        final temp = HijriCalendar()
+          ..hYear = prevYear
+          ..hMonth = prevMonth
+          ..hDay = 1;
+
+        final lastDayOfPrevMonth =
+        temp.getDaysInMonth(prevYear, prevMonth);
+
+        _setPreviousHijriMonthByValues(prevYear, prevMonth);
+
+        return lastDayOfPrevMonth;
+      }
+      else {
+          return hijriDate.hDay - 1;
+        }
+    }
+    else {
       return hijriDate.hDay;
     }
   }
@@ -62,6 +87,17 @@ class DateController extends GetxController {
     hijriDate = HijriCalendar.now();
     hijriYear = hijriDate.hYear;
     hijriMonth = hijriDate.longMonthName;
+  }
+
+  void _setPreviousHijriMonthByValues(int year, int month) {
+    hijriYear = year;
+
+    final temp = HijriCalendar()
+      ..hYear = year
+      ..hMonth = month
+      ..hDay = 1;
+
+    hijriMonth = temp.getLongMonthName();
   }
 
   void _updateGregorian() {

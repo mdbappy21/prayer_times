@@ -41,7 +41,7 @@ class CustomDrawer extends StatelessWidget {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.info_outline),
-                    title: Text('Important Prayer Rules',style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white),),
+                    title: Text('Important Prayer Time Rules',style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white),),
                     onTap: () {
                       onToggleDrawer();
                       Get.to(() => const ImportantRules());
